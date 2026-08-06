@@ -1,38 +1,204 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Lagersystem</title>
+
     <link rel="stylesheet" href="style.css">
+
 </head>
+
 
 <body>
 
+
 <h1>📦 Lagersystem</h1>
+
+
 
 <div class="box">
 
-    <label>Barcode:</label>
-    <input id="barcode" type="text">
 
-    <button onclick="suchen()">Suchen</button>
 
-    <h2 id="artikel">Kein Artikel</h2>
+    <h2>📷 Barcode Scanner</h2>
 
-    <p>Bestand: <span id="bestand">-</span></p>
 
-    <input id="menge" type="number" placeholder="Menge">
+    <input 
+        id="barcode" 
+        type="text" 
+        placeholder="Barcode"
+    >
+
 
     <br><br>
 
-    <button class="in" onclick="eingang()">IN +</button>
-    <button class="out" onclick="ausgang()">OUT -</button>
+
+    <div id="reader" style="width:100%; max-width:500px;"></div>
+
+
+
+    <br>
+
+
+    <button onclick="suchen()">
+        🔍 Barcode suchen
+    </button>
+
+
+
+
+
+    <h2>🔍 Name oder ID suchen</h2>
+
+
+    <input 
+        id="nameSuche" 
+        placeholder="Name oder ID"
+    >
+
+
+    <br><br>
+
+
+    <button onclick="sucheNameID()">
+        Suchen
+    </button>
+
+
+
+
+
+
+    <h2 id="artikel">
+        Kein Artikel
+    </h2>
+
+
+
+    <p>
+        Bestand:
+        <span id="bestand">-</span>
+    </p>
+
+
+
+
+
+
+    <input 
+        id="menge"
+        type="number"
+        placeholder="Menge"
+    >
+
+
+
+    <br><br>
+
+
+
+    <button class="in" onclick="eingang()">
+        IN +
+    </button>
+
+
+    <button class="out" onclick="ausgang()">
+        OUT -
+    </button>
+
+
+
+
+
+
+
+    <div id="neuerArtikelBox" style="display:none;">
+
+
+        <h2>➕ Neuen Artikel anlegen</h2>
+
+
+
+        <input 
+            id="neuBarcode"
+            placeholder="Barcode"
+        >
+
+
+        <br><br>
+
+
+
+        <input 
+            id="neuName"
+            placeholder="Artikelname"
+        >
+
+
+        <br><br>
+
+
+
+        <input 
+            id="neuBestand"
+            type="number"
+            placeholder="Startbestand"
+        >
+
+
+        <br><br>
+
+
+
+        <input 
+            id="neuLagerplatz"
+            placeholder="Lagerplatz"
+        >
+
+
+        <br><br>
+
+
+
+        <button onclick="artikelAnlegen()">
+            Speichern
+        </button>
+
+
+
+    </div>
+
+
+
 
 </div>
 
-<<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>>
+
+
+
+
+<!-- Supabase laden -->
+
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+
+
+<!-- Barcode Scanner laden -->
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+
+
+<!-- Dein Javascript -->
+
 <script src="script.js"></script>
 
+
+
 </body>
+
 </html>

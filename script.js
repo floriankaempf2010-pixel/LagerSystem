@@ -1,6 +1,7 @@
 const SUPABASE_URL = "https://eazcxqarrcosjywrdcjk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_FdG9XQDEkcO-D5ebncJ4mg_YTedGq_Z";
 
+
 const supabaseClient = supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
@@ -8,55 +9,165 @@ const supabaseClient = supabase.createClient(
 
 
 let aktuellerArtikel = null;
+let scanner = null;
 
 
-// Artikel suchen
+
+// Artikel suchen per Barcode
 async function suchen(){
 
-    let barcode = document.getElementById("barcode").value;
+    let barcode = document.getElementById("barcode").value.trim();
+
+
+    if(!barcode){
+        return;
+    }
+
 
     let { data, error } = await supabaseClient
         .from("Artikel")
         .select("*")
         .eq("barcode", barcode)
-        .single();
+        .maybeSingle();
+
 
 
     if(error){
+
         console.log(error);
-        alert("Artikel nicht gefunden");
         return;
+
     }
 
+
+
+    if(!data){
+
+        aktuellerArtikel = null;
+
+        document.getElementById("artikel").innerHTML =
+            "❌ Kein Artikel gefunden";
+
+
+        document.getElementById("bestand").innerHTML =
+            "-";
+
+
+        document.getElementById("neuerArtikelBox").style.display =
+            "block";
+
+
+        document.getElementById("neuBarcode").value =
+            barcode;
+
+
+        return;
+
+    }
+
+
+    anzeigen(data);
+
+}
+
+
+
+
+// Artikel anzeigen
+
+function anzeigen(data){
 
     aktuellerArtikel = data;
 
 
     document.getElementById("artikel").innerHTML =
-        data.name;
+        "✅ " + data.name;
+
 
     document.getElementById("bestand").innerHTML =
         data.bestand;
+
+
+    document.getElementById("neuerArtikelBox").style.display =
+        "none";
+
 }
 
 
 
-// Bestand ändern
-async function bestandAendern(menge){
 
-    if(!aktuellerArtikel){
-        alert("Bitte zuerst Artikel suchen!");
+
+// Suche nach Name oder ID
+
+async function sucheNameID(){
+
+    let suche =
+        document.getElementById("nameSuche").value.trim();
+
+
+
+    let { data, error } = await supabaseClient
+        .from("Artikel")
+        .select("*")
+        .or(`name.ilike.%${suche}%,id.eq.${suche}`)
+        .limit(1)
+        .maybeSingle();
+
+
+
+    if(error){
+
+        console.log(error);
         return;
+
     }
 
 
-    let neuerBestand = aktuellerArtikel.bestand + menge;
+
+    if(data){
+
+        anzeigen(data);
+
+    }else{
+
+        document.getElementById("artikel").innerHTML =
+            "❌ Kein Artikel gefunden";
+
+    }
+
+}
+
+
+
+
+// Bestand ändern
+
+async function bestandAendern(aenderung){
+
+
+    if(!aktuellerArtikel){
+
+        alert("Erst Artikel suchen!");
+
+        return;
+
+    }
+
+
+
+    let neuerBestand =
+        aktuellerArtikel.bestand + aenderung;
+
 
 
     if(neuerBestand < 0){
+
         alert("Nicht genug Bestand!");
+
         return;
+
     }
+
 
 
     let { error } = await supabaseClient
@@ -67,57 +178,185 @@ async function bestandAendern(menge){
         .eq("id", aktuellerArtikel.id);
 
 
+
     if(error){
+
         console.log(error);
-        alert("Fehler beim Speichern");
         return;
+
     }
 
 
-    aktuellerArtikel.bestand = neuerBestand;
+
+    aktuellerArtikel.bestand =
+        neuerBestand;
 
 
     document.getElementById("bestand").innerHTML =
         neuerBestand;
 
-
-    console.log("Neuer Bestand:", neuerBestand);
 }
 
 
 
-// IN +
+
 function eingang(){
 
-    let menge = Number(
-        document.getElementById("menge").value
-    );
+    let menge =
+        Number(document.getElementById("menge").value);
 
 
-    if(!menge){
-        alert("Menge eingeben!");
-        return;
+    if(menge){
+
+        bestandAendern(menge);
+
     }
 
-
-    bestandAendern(menge);
 }
 
 
 
-// OUT -
 function ausgang(){
 
-    let menge = Number(
-        document.getElementById("menge").value
-    );
+    let menge =
+        Number(document.getElementById("menge").value);
 
 
-    if(!menge){
-        alert("Menge eingeben!");
+    if(menge){
+
+        bestandAendern(-menge);
+
+    }
+
+}
+
+
+
+
+
+// Neuer Artikel speichern
+
+async function artikelAnlegen(){
+
+
+    let artikel = {
+
+        barcode:
+        document.getElementById("neuBarcode").value,
+
+
+        name:
+        document.getElementById("neuName").value,
+
+
+        bestand:
+        Number(document.getElementById("neuBestand").value),
+
+
+        lagerplatz:
+        document.getElementById("neuLagerplatz").value
+
+    };
+
+
+
+    let { error } = await supabaseClient
+        .from("Artikel")
+        .insert([artikel]);
+
+
+
+    if(error){
+
+        console.log(error);
+        alert("Fehler");
+
         return;
+
     }
 
 
-    bestandAendern(-menge);
+
+    alert("Artikel gespeichert");
+
+
+    document.getElementById("neuerArtikelBox").style.display =
+        "none";
+
+
 }
+
+
+
+
+
+
+// Barcode Scanner
+
+function scannerStarten(){
+
+
+    if(scanner){
+
+        return;
+
+    }
+
+
+
+    scanner = new Html5Qrcode("reader");
+
+
+
+    scanner.start(
+
+        {
+            facingMode: "environment"
+        },
+
+
+        {
+            fps: 10,
+            qrbox: 250
+        },
+
+
+        function(barcode){
+
+
+            document.getElementById("barcode").value =
+                barcode;
+
+
+            suchen();
+
+
+        },
+
+
+        function(error){
+
+        }
+
+
+    )
+
+    .catch(function(error){
+
+        console.log("Scanner Fehler:", error);
+
+    });
+
+
+}
+
+
+
+
+// automatisch starten
+
+window.addEventListener("load", function(){
+
+    scannerStarten();
+
+});
