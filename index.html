@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lagersystem</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>📦 Lagersystem</h1>
+
+<div class="box">
+
+    <label>Barcode:</label>
+    <input id="barcode" type="text">
+
+    <button onclick="suchen()">Suchen</button>
+
+    <h2 id="artikel">Kein Artikel</h2>
+
+    <p>Bestand: <span id="bestand">-</span></p>
+
+    <input id="menge" type="number" placeholder="Menge">
+
+    <br><br>
+
+    <button class="in" onclick="eingang()">IN +</button>
+    <button class="out" onclick="ausgang()">OUT -</button>
+
+</div>
+
+<<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>>
+<script src="script.js"></script>
+
+</body>
+</html>
